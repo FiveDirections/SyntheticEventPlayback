@@ -180,6 +180,9 @@ if __name__ == '__main__':
     opts, args = optp.parse_args()
     optp.parse_args()
 
+    if not len(args):
+        optp.error("Missing file argument")
+
     with open(args[0]) as f:
         content = f.readlines()
 
