@@ -175,11 +175,23 @@ class FD2PN(object):
 
     def encodeExit(self, value):
         ret = []
-        ret.append('wasGeneratedBy(ex:wgb{}, ex:ag{}, ex:act{}, -, [\
+
+        ret.append('activity(ex:act{}, -, -, [\n\tprov:type=\'adapt:unitOfExecution\',\
+        \n\tadapt:machineID="{}",\
+        \n\tprov:atTime="{}",\
+        \n\tadapt:pid="{}",\
+        \n\tadapt:cmdLine="{}",\
+        \n\tadapt:cmdString="{}"])\n' . format(value['index'], value['host'],
+                                               self.iso8601(value['time']), value['pid'],
+                                               value['process'], value['process']))
+
+
+        ret.append('wasGeneratedBy(ex:wgb{}, ex:act{}, ex:act{}, -, [\
         \n\tadapt:genOp="ret_val",\
         \n\tadapt:retVal="{}"])\n' . format(value['index'], value['index'], value['index'], value['code']))
 
         return ret
+
     def json2Prov(self, json):
         pp = ["document\n", "prefix ex <http://example.org/>", "prefix adapt <http://adapt.galois.com/>",
               "prefix foaf <http://xmlns.com/foaf/0.1/>", "prefix dc <http://purl.org/dc/elements/1.1/>",
@@ -189,7 +201,7 @@ class FD2PN(object):
             for key, value in decoded[i].items() :
                 if(key=='file' or key=='network' or key=='registry' or key=='exit'):
                     self.getAgents(value)
-                if(key=='file' or key=='exit'):
+                if(key=='file'):
                     self.getEntities(key, value)
 
         pp += self.pretty_print_agent()
@@ -232,7 +244,7 @@ if __name__ == '__main__':
     fs2pn = FD2PN()
     for i in xrange(1,len(content)):
         if(i % 9 == 0):
-            print >>sys.stderr, "Decoding " + str(i)
+            print >>sys.stderr, "Decoding line " + str(i)
             decoded = json.loads(content[i-1])
             #print json.dumps(decoded, sort_keys=True, indent=4)
             lst = fs2pn.json2Prov(decoded)
