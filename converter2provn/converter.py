@@ -38,13 +38,13 @@ class FD2PN(object):
         ret = []
         for key in self.setAgents:
             value = self.setAgents[key]
-            ret.append('agent(ex:ag{}, [prov:type="adapt:unitOfExecution",' . format(value['index']))
-            ret.append('\tadapt:machineID = "{}",' . format(value['adapt:machineID']))
+            ret.append('agent(ex:ag{}, [prov:type=\'adapt:unitOfExecution\',' . format(value['index']))
+            ret.append('\tadapt:machineID = \'{}\',' . format(value['adapt:machineID']))
             if "foaf:accountName" in value:
-                ret.append('\tfoaf:name = "{}",' . format(value['foaf:name']))
-                ret.append('\tfoaf:accountName = "{}"])\n' . format(value['foaf:accountName']))
+                ret.append('\tfoaf:name = \'{}\',' . format(value['foaf:name']))
+                ret.append('\tfoaf:accountName = \'{}\'])\n' . format(value['foaf:accountName']))
             else:
-                ret.append('\tfoaf:name = "{}"])\n' . format(value['foaf:name']))
+                ret.append('\tfoaf:name = \'{}\'])\n' . format(value['foaf:name']))
         return ret
 
     def pretty_print_entities(self):
@@ -53,8 +53,8 @@ class FD2PN(object):
             value = self.setEntities[key]
             ret.append('entity(ex:ent{}, [\
                   \n\tprov:type=adapt:artifact,\
-                  \n\tadapt:artifactType="{}",\
-                  \n\tadapt:filePath="{}"])\n' . format(value['index'], value['type'],
+                  \n\tadapt:artifactType=\'{}\',\
+                  \n\tadapt:filePath=\'{}\'])\n' . format(value['index'], value['type'],
                                                         value['dir'] + value['file']))
         return ret
 
@@ -84,40 +84,40 @@ class FD2PN(object):
     def encodeProcess(self,value):
         ret = []
         ret.append('activity(ex:act{}, -, -, [\n\tprov:type=\'adapt:unitOfExecution\',\
-        \n\tadapt:machineID="{}",\
-        \n\tfoaf:accountName="{}",\
-        \n\tadapt:pwd="{}",\
-        \n\tprov:atTime="{}",\
-        \n\tadapt:pid="{}",\
-        \n\tadapt:ppid="{}",\
-        \n\tadapt:privs="{}",\
-        \n\tadapt:cmdLine="{}",\
-        \n\tadapt:cmdString="{}"])\n' . format(value['index'], value['host'], value['user'], value['dir'],
+        \n\tadapt:machineID=\'{}\',\
+        \n\tfoaf:accountName=\'{}\',\
+        \n\tadapt:pwd=\'{}\',\
+        \n\tprov:atTime=\'{}\',\
+        \n\tadapt:pid=\'{}\',\
+        \n\tadapt:ppid=\'{}\',\
+        \n\tadapt:privs=\'{}\',\
+        \n\tadapt:cmdLine=\'{}\',\
+        \n\tadapt:cmdString=\'{}\'])\n' . format(value['index'], value['host'], value['user'], value['dir'],
                                                self.iso8601(value['time']), value['pid'], value['ppid'],
                                                value['elevation'], value['cmd'], value['cmd']))
 
         kk = str(value['ppid']) + "_" + value['file']
         activity = self.tmpPID[kk] if kk in self.tmpPID else 0
         ret.append('wasStartedBy(ex:act{}, ex:act{}, {}, [\
-            \n\tprov:atTime="{}"])\n' . format(value['index'], activity,
+            \n\tprov:atTime=\'{}\'])\n' . format(value['index'], activity,
                                                       self.iso8601(value['time']), self.iso8601(value['time'])))
         return ret
 
     def encodeFile(self, value):
         ret = []
         ret.append('activity(ex:act{}, -, -, [\n\tprov:type=\'adapt:unitOfExecution\',\
-        \n\tadapt:machineID="{}",\
-        \n\tprov:atTime="{}",\
-        \n\tadapt:pid="{}",\
-        \n\tadapt:cmdLine="{}",\
-        \n\tadapt:cmdString="{}"])\n' . format(value['index'], value['host'],
+        \n\tadapt:machineID=\'{}\',\
+        \n\tprov:atTime=\'{}\',\
+        \n\tadapt:pid=\'{}\',\
+        \n\tadapt:cmdLine=\'{}\',\
+        \n\tadapt:cmdString=\'{}\'])\n' . format(value['index'], value['host'],
                                                self.iso8601(value['time']), value['pid'],
                                                value['process'], value['process']))
 
         ret.append('wasAssociatedWith(ex:as{}, ex:act{}, ex:ag{}, -, -)\n' . format(value['index'],
                                                                 value['index'], value['index']))
 
-        ret.append('used(ex:us{}, ex:act{}, ex:ent{}, "{}", [adapt:useOp="{}"])\n' . format(value['index'],
+        ret.append('used(ex:us{}, ex:act{}, ex:ent{}, \'{}\', [adapt:useOp=\'{}\'])\n' . format(value['index'],
                                                             value['index'], value['index'],
                                                             self.iso8601(value['time']), value['action']))
 
@@ -131,12 +131,12 @@ class FD2PN(object):
 
         ret.append('dc:description(ex:socket{}, [\
             \n\tprov:type=tc:metadata,\
-            \n\ttc:dstPortID="{}",\
-            \n\ttc:srcPort="{}",\
-            \n\ttc:srcIP="{}",\
-            \n\ttc:dstIP="{}",\
-            \n\ttc:host="{}",\
-            \n\ttc:protocol="{}"])\n' . format(value['index'],
+            \n\ttc:dstPortID=\'{}\',\
+            \n\ttc:srcPort=\'{}\',\
+            \n\ttc:srcIP=\'{}\',\
+            \n\ttc:dstIP=\'{}\',\
+            \n\ttc:host=\'{}\',\
+            \n\ttc:protocol=\'{}\'])\n' . format(value['index'],
                                          value['dport'],
                                          value['sport'],
                                          value['saddr'],
@@ -145,7 +145,7 @@ class FD2PN(object):
                                          value['protocol']))
 
         ret.append('wasAssociatedWith(ex:as{}, ex:a{}, ex:ag{}, -, [])\n' . format(value['index'], value['index'], value['index']))
-        ret.append('wasGeneratedBy(ex:e{}, ex:a{}, -, [tc:genOp="{}", prov:atTime="{}"])\n' . format(value['index'], value['index'],
+        ret.append('wasGeneratedBy(ex:e{}, ex:a{}, -, [tc:genOp=\'{}\', prov:atTime=\'{}\'])\n' . format(value['index'], value['index'],
                                                                                     value['action'], self.iso8601(value['time'])))
         return ret
 
@@ -153,22 +153,22 @@ class FD2PN(object):
         ret = []
         ret.append('entity(ex:reg{}, [\
         \n\tprov:type=adapt:artifact,\
-        \n\tadapt:artifactType="registryEntry",\
-        \n\tadapt:registryKey="{}"])\n' . format(value['index'],value['key']))
+        \n\tadapt:artifactType=\'registryEntry\',\
+        \n\tadapt:registryKey=\'{}\'])\n' . format(value['index'],value['key']))
 
         ret.append('activity(ex:act{}, -, -, [\n\tprov:type=\'adapt:unitOfExecution\',\
-        \n\tadapt:machineID="{}",\
-        \n\tprov:atTime="{}",\
-        \n\tadapt:pid="{}",\
-        \n\tadapt:cmdLine="{}",\
-        \n\tadapt:cmdString="{}"])\n' . format(value['index'], value['host'],
+        \n\tadapt:machineID=\'{}\',\
+        \n\tprov:atTime=\'{}\',\
+        \n\tadapt:pid=\'{}\',\
+        \n\tadapt:cmdLine=\'{}\',\
+        \n\tadapt:cmdString=\'{}\'])\n' . format(value['index'], value['host'],
                                                self.iso8601(value['time']), value['pid'],
                                                value['process'], value['process']))
 
         ret.append('wasGeneratedBy(ex:wgb{}, ex:reg{}, ex:ent{}, -, [\
-        \n\tadapt:genOp="{}",\
-        \n\tadapt:registryValue="{}",\
-        \n\tadapt:registryType="{}"])\n' . format(value['index'], value['index'], value['index'],
+        \n\tadapt:genOp=\'{}\',\
+        \n\tadapt:registryValue=\'{}\',\
+        \n\tadapt:registryType=\'{}\'])\n' . format(value['index'], value['index'], value['index'],
                                                   value['action'], value['newval'], value['newtype']))
 
         return ret
@@ -177,18 +177,18 @@ class FD2PN(object):
         ret = []
 
         ret.append('activity(ex:act{}, -, -, [\n\tprov:type=\'adapt:unitOfExecution\',\
-        \n\tadapt:machineID="{}",\
-        \n\tprov:atTime="{}",\
-        \n\tadapt:pid="{}",\
-        \n\tadapt:cmdLine="{}",\
-        \n\tadapt:cmdString="{}"])\n' . format(value['index'], value['host'],
+        \n\tadapt:machineID=\'{}\',\
+        \n\tprov:atTime=\'{}\',\
+        \n\tadapt:pid=\'{}\',\
+        \n\tadapt:cmdLine=\'{}\',\
+        \n\tadapt:cmdString=\'{}\'])\n' . format(value['index'], value['host'],
                                                self.iso8601(value['time']), value['pid'],
                                                value['process'], value['process']))
 
 
         ret.append('wasAssociatedWith(ex:as{}, ex:act{}, ex:ag{}, -, [\
-        \n\tadapt:genOp="ret_val",\
-        \n\tadapt:retVal="{}"])\n' . format(value['index'], value['index'], value['index'], value['code']))
+        \n\tadapt:genOp=\'ret_val\',\
+        \n\tadapt:retVal=\'{}\'])\n' . format(value['index'], value['index'], value['index'], value['code']))
 
         return ret
 
