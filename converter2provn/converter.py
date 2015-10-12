@@ -31,7 +31,7 @@ class FD2PN(object):
         ret = []
         for key in self.setAgents:
             value = self.setAgents[key]
-            ret.append('agent(ex:ag{}, [prov:type="adapt:unitOfExecution"' . format(value['index']))
+            ret.append('agent(ex:ag{}, [prov:type="adapt:unitOfExecution",' . format(value['index']))
             ret.append('\tadapt:machineID = "{}",' . format(value['adapt:machineID']))
             if "foaf:accountName" in value:
                 ret.append('\tfoaf:name = "{}",' . format(value['foaf:name']))
