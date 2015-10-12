@@ -29,10 +29,8 @@ class FD2PN(object):
     tmpPID = {}
 
     def iso8601(self, t):
-        print t*1000
         delta = datetime.timedelta(seconds=t)
         epoch = datetime.datetime.strptime("1970-01-01", "%Y-%m-%d")
-
         time_str = str((epoch + delta).isoformat())
         return time_str
 
