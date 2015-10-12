@@ -53,8 +53,9 @@ class FD2PN(object):
             value = self.setEntities[key]
             ret.append('entity(ex:ent{}, [\
                   \n\tprov:type=adapt:artifact,\
-                  \n\tadapt:artifactType="file",\
-                  \n\tadapt:filePath="{}"])\n' . format(value['index'], value['dir'] + value['file']))
+                  \n\tadapt:artifactType="{}",\
+                  \n\tadapt:filePath="{}"])\n' . format(value['index'], value['type'],
+                                                        value['dir'] + value['file']))
         return ret
 
     def getAgents(self,value):
@@ -68,13 +69,16 @@ class FD2PN(object):
             agProperties['index'] = value['index']
             self.setAgents[agent] = agProperties
 
-    def getEntities(self,value):
+    def getEntities(self, key, value):
+        if('file' not in value):
+            value['file'] = "\\"
         entity = value['dir'] + "\\" + value['file']
         if(entity not in self.setEntities):
             eProperties = {}
             eProperties['dir'] = value['dir']
             eProperties['file'] = value['file']
             eProperties['index'] = value['index']
+            eProperties['type'] = key
             self.setEntities[entity] = eProperties
 
     def encodeProcess(self,value):
@@ -83,7 +87,7 @@ class FD2PN(object):
         \n\tadapt:machineID="{}",\
         \n\tfoaf:accountName="{}",\
         \n\tadapt:pwd="{}",\
-        \n\tprov:startedAtTime="{}",\
+        \n\tprov:atTime="{}",\
         \n\tadapt:pid="{}",\
         \n\tadapt:ppid="{}",\
         \n\tadapt:privs="{}",\
@@ -95,7 +99,7 @@ class FD2PN(object):
         kk = str(value['ppid']) + "_" + value['file']
         activity = self.tmpPID[kk] if kk in self.tmpPID else 0
         ret.append('wasStartedBy(ex:act{}, ex:act{}, {}, [\
-            \n\tprov:startedAtTime="{}"])\n' . format(value['index'], activity,
+            \n\tprov:atTime="{}"])\n' . format(value['index'], activity,
                                                       self.iso8601(value['time']), self.iso8601(value['time'])))
         return ret
 
@@ -103,7 +107,7 @@ class FD2PN(object):
         ret = []
         ret.append('activity(ex:act{}, -, -, [\n\tprov:type=\'adapt:unitOfExecution\',\
         \n\tadapt:machineID="{}",\
-        \n\tprov:startedAtTime="{}",\
+        \n\tprov:atTime="{}",\
         \n\tadapt:pid="{}",\
         \n\tadapt:cmdLine="{}",\
         \n\tadapt:cmdString="{}"])\n' . format(value['index'], value['host'],
@@ -154,20 +158,28 @@ class FD2PN(object):
 
         ret.append('activity(ex:act{}, -, -, [\n\tprov:type=\'adapt:unitOfExecution\',\
         \n\tadapt:machineID="{}",\
-        \n\tprov:startedAtTime="{}",\
+        \n\tprov:atTime="{}",\
         \n\tadapt:pid="{}",\
         \n\tadapt:cmdLine="{}",\
         \n\tadapt:cmdString="{}"])\n' . format(value['index'], value['host'],
                                                self.iso8601(value['time']), value['pid'],
                                                value['process'], value['process']))
 
-        ret.append('wasGeneratedBy(ex:wgb{}, ex:reg1, ex:act299, -, [\
+        ret.append('wasGeneratedBy(ex:wgb{}, ex:reg{}, ex:ent{}, -, [\
         \n\tadapt:genOp="{}",\
         \n\tadapt:registryValue="{}",\
-        \n\tadapt:registryType="{}"])\n' . format(value['index'], value['action'], value['newval'], value['newtype']))
+        \n\tadapt:registryType="{}"])\n' . format(value['index'], value['index'], value['index'],
+                                                  value['action'], value['newval'], value['newtype']))
 
         return ret
 
+    def encodeExit(self, value):
+        ret = []
+        ret.append('wasGeneratedBy(ex:wgb{}, ex:ag{}, ex:act{}, -, [\
+        \n\tadapt:genOp="ret_val",\
+        \n\tadapt:retVal="{}"])\n' . format(value['index'], value['index'], value['index'], value['code']))
+
+        return ret
     def json2Prov(self, json):
         pp = ["document\n", "prefix ex <http://example.org/>", "prefix adapt <http://adapt.galois.com/>",
               "prefix foaf <http://xmlns.com/foaf/0.1/>", "prefix dc <http://purl.org/dc/elements/1.1/>",
@@ -175,10 +187,10 @@ class FD2PN(object):
 
         for i in xrange(len(decoded)):
             for key, value in decoded[i].items() :
-                if(key=='file' or key=='network' or key=='registry'):
+                if(key=='file' or key=='network' or key=='registry' or key=='exit'):
                     self.getAgents(value)
-                if(key=='file'):
-                    self.getEntities(value)
+                if(key=='file' or key=='exit'):
+                    self.getEntities(key, value)
 
         pp += self.pretty_print_agent()
         pp += self.pretty_print_entities()
@@ -193,6 +205,8 @@ class FD2PN(object):
                     pp += self.encodeRegistry(value)
                 elif(key=='network'):
                     pp += self.encodeNetwork(value)
+                elif(key=='exit'):
+                    pp += self.encodeExit(value)
                 else:
                     print >>sys.stderr, "Parsing error (ignoring entry): " + key
 
