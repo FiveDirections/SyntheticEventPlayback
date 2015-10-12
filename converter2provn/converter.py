@@ -186,7 +186,7 @@ class FD2PN(object):
                                                value['process'], value['process']))
 
 
-        ret.append('wasGeneratedBy(ex:wgb{}, ex:act{}, ex:act{}, -, [\
+        ret.append('wasAssociatedWith(ex:as{}, ex:act{}, ex:ag{}, -, [\
         \n\tadapt:genOp="ret_val",\
         \n\tadapt:retVal="{}"])\n' . format(value['index'], value['index'], value['index'], value['code']))
 
