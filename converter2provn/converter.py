@@ -162,7 +162,9 @@ class FD2PN(object):
         return ret
 
     def json2Prov(self, json):
-        pp = []
+        pp = ["document\n", "prefix ex <http://example.org/>", "prefix adapt <http://adapt.galois.com/>",
+              "prefix foaf <http://xmlns.com/foaf/0.1/>", "prefix dc <http://purl.org/dc/elements/1.1/>",
+              "prefix nfo <http://www.semanticdesktop.org/ontologies/2007/03/22/nfo/v1.2/>", ""]
 
         for i in xrange(len(decoded)):
             for key, value in decoded[i].items() :
@@ -187,6 +189,7 @@ class FD2PN(object):
                 else:
                     print >>sys.stderr, "Parsing error (ignoring entry): " + key
 
+        pp.append("end document")
         return pp
 
 #with open('youtube.txt') as data_file:
@@ -204,7 +207,7 @@ if __name__ == '__main__':
     with open(args[0]) as f:
         content = f.readlines()
 
-    outFile =  open(args[1], "a")
+    outFile =  open(args[1], "w")
 
     fs2pn = FD2PN()
     for i in xrange(1,len(content)):
