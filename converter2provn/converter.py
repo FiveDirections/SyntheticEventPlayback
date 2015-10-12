@@ -31,7 +31,7 @@ class FD2PN(object):
     def iso8601(self, t):
         delta = datetime.timedelta(seconds=t)
         epoch = datetime.datetime.strptime("1970-01-01", "%Y-%m-%d")
-        time_str = str((epoch + delta).isoformat())
+        time_str = str((epoch + delta).isoformat()) + 'Z'
         return time_str
 
     def pretty_print_agent(self):
