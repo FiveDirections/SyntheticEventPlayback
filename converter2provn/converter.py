@@ -19,6 +19,7 @@ import json
 from pprint import pprint
 import sys
 import optparse
+import datetime
 
 class FD2PN(object):
     """FiveDirections Simulator Data to TC's ADAPT PROV-N"""
@@ -26,6 +27,12 @@ class FD2PN(object):
     setAgents = {}
     setEntities = {}
     tmpPID = {}
+
+    def iso8601(self, t):
+        delta = datetime.timedelta(microseconds=t)
+        day = datetime.date.today()
+        time_str = str(day) + 'T' + str(delta) + 'Z'
+        return time_str
 
     def pretty_print_agent(self):
         ret = []
@@ -82,15 +89,15 @@ class FD2PN(object):
         \n\tadapt:privs="{}",\
         \n\tadapt:cmdLine="{}",\
         \n\tadapt:cmdString="{}"])\n' . format(value['index'], value['host'], value['user'], value['dir'],
-                                               value['time'], value['pid'], value['ppid'],
+                                               self.iso8601(value['time']), value['pid'], value['ppid'],
                                                value['elevation'], value['cmd'], value['cmd']))
 
         kk = str(value['ppid']) + "_" + value['file']
         activity = self.tmpPID[kk] if kk in self.tmpPID else 0
         ret.append('wasStartedBy(ex:act{}, ex:act{}, {}, [\
-        \n\tprov:startedAtTime="{}"])\n' . format(value['index'], activity, value['time'], value['time']))
+            \n\tprov:startedAtTime="{}"])\n' . format(value['index'], activity,
+                                                      self.iso8601(value['time']), self.iso8601(value['time'])))
         return ret
-
 
     def encodeFile(self, value):
         ret = []
@@ -100,7 +107,7 @@ class FD2PN(object):
         \n\tadapt:pid="{}",\
         \n\tadapt:cmdLine="{}",\
         \n\tadapt:cmdString="{}"])\n' . format(value['index'], value['host'],
-                                               value['time'], value['pid'],
+                                               self.iso8601(value['time']), value['pid'],
                                                value['process'], value['process']))
 
         ret.append('wasAssociatedWith(ex:as{}, ex:act{}, ex:ag{}, -, -)\n' . format(value['index'],
@@ -108,7 +115,7 @@ class FD2PN(object):
 
         ret.append('used(ex:us{}, ex:act{}, ex:ent{}, "{}", [adapt:useOp="{}"])\n' . format(value['index'],
                                                             value['index'], value['index'],
-                                                            value['time'], value['action']))
+                                                            self.iso8601(value['time']), value['action']))
 
         kk = str(value['pid']) + "_" + value['file']
         self.tmpPID[kk] = "ex:act" + str(value['index'])
@@ -135,7 +142,7 @@ class FD2PN(object):
 
         ret.append('wasAssociatedWith(ex:as{}, ex:a{}, ex:ag{}, -, [])\n' . format(value['index'], value['index'], value['index']))
         ret.append('wasGeneratedBy(ex:e{}, ex:a{}, -, [tc:genOp="{}", prov:atTime="{}"])\n' . format(value['index'], value['index'],
-                                                                                    value['action'], value['time']))
+                                                                                    value['action'], self.iso8601(value['time'])))
         return ret
 
     def encodeRegistry(self, value):
@@ -151,7 +158,7 @@ class FD2PN(object):
         \n\tadapt:pid="{}",\
         \n\tadapt:cmdLine="{}",\
         \n\tadapt:cmdString="{}"])\n' . format(value['index'], value['host'],
-                                               value['time'], value['pid'],
+                                               self.iso8601(value['time']), value['pid'],
                                                value['process'], value['process']))
 
         ret.append('wasGeneratedBy(ex:wgb{}, ex:reg1, ex:act299, -, [\
@@ -208,7 +215,6 @@ if __name__ == '__main__':
         content = f.readlines()
 
     outFile =  open(args[1], "w")
-
     fs2pn = FD2PN()
     for i in xrange(1,len(content)):
         if(i % 9 == 0):
