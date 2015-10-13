@@ -106,9 +106,9 @@ class FD2PN(object):
 
         kk = str(value['ppid']) + "_" + value['file']
         activity = self.tmpPID[kk] if kk in self.tmpPID else 0
-        ret.append('wasStartedBy(ex:wsb{}; ex:act{}, {}, {}, [\
-            \n\tprov:atTime=\'{}\'])\n' . format(value['index'], value['index'], activity,
-                                                      self.iso8601(value['time']), self.iso8601(value['time'])))
+        ret.append('wasStartedBy(ex:wsb{}; ex:act{}, {}, -, [\
+            \n\tprov:atTime={}])\n' . format(value['index'], value['index'], activity,
+                                             self.iso8601(value['time'])))
         return ret
 
     def encodeFile(self, value):
@@ -156,7 +156,7 @@ class FD2PN(object):
                                          json.dumps(value['protocol'])))
 
         ret.append('wasAssociatedWith(ex:as{}; ex:a{}, ex:ag{}, -, [])\n' . format(value['index'], value['index'], value['index']))
-        ret.append('wasGeneratedBy(ex:wgb{}, ex:e{}, ex:a{}, -, [adapt:genOp={}, prov:atTime={}])\n' . format(value['index'], value['index'], value['index'],
+        ret.append('wasGeneratedBy(ex:wgb{}; ex:e{}, ex:a{}, -, [adapt:genOp={}, prov:atTime={}])\n' . format(value['index'], value['index'], value['index'],
                                                                                     json.dumps(value['action']), self.iso8601(value['time'])))
         return ret
 
@@ -179,7 +179,7 @@ class FD2PN(object):
                                              json.dumps(value['process']),
                                              json.dumps(value['process'])))
 
-        ret.append('wasGeneratedBy(ex:wgb{}, ex:reg{}, ex:ent{}, -, [\
+        ret.append('wasGeneratedBy(ex:wgb{}; ex:reg{}, ex:ent{}, -, [\
         \n\tadapt:genOp={},\
         \n\tadapt:registryValue={},\
         \n\tadapt:registryType={}])\n' . format(value['index'], value['index'], value['index'],
