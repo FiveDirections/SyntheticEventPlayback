@@ -38,13 +38,13 @@ class FD2PN(object):
         ret = []
         for key in self.setAgents:
             value = self.setAgents[key]
-            ret.append('agent(ex:ag{}, [prov:type=\'adapt:unitOfExecution\',' . format(value['index']))
-            ret.append('\tadapt:machineID = \'{}\',' . format(value['adapt:machineID']))
+            ret.append('agent(ex:ag{}, [prov:type=\"adapt:unitOfExecution\",' . format(value['index']))
+            ret.append('\tadapt:machineID = {},' . format(json.dumps(value['adapt:machineID'])))
             if "foaf:accountName" in value:
-                ret.append('\tfoaf:name = \'{}\',' . format(value['foaf:name']))
-                ret.append('\tfoaf:accountName = \'{}\'])\n' . format(value['foaf:accountName']))
+                ret.append('\tfoaf:name = {},' . format(json.dumps(value['foaf:name'])))
+                ret.append('\tfoaf:accountName = {}])\n' . format(json.dumps(value['foaf:accountName'])))
             else:
-                ret.append('\tfoaf:name = \'{}\'])\n' . format(value['foaf:name']))
+                ret.append('\tfoaf:name = {}])\n' . format(json.dumps(value['foaf:name'])))
         return ret
 
     def pretty_print_entities(self):
@@ -53,9 +53,9 @@ class FD2PN(object):
             value = self.setEntities[key]
             ret.append('entity(ex:ent{}, [\
                   \n\tprov:type=adapt:artifact,\
-                  \n\tadapt:artifactType=\'{}\',\
-                  \n\tadapt:filePath=\'{}\'])\n' . format(value['index'], value['type'],
-                                                        value['dir'] + value['file']))
+                  \n\tadapt:artifactType={},\
+                  \n\tadapt:filePath={}])\n' . format(value['index'], json.dumps(value['type']),
+                                                        json.dumps(value['dir'] + value['file'])))
         return ret
 
     def getAgents(self,value):
@@ -72,6 +72,7 @@ class FD2PN(object):
     def getEntities(self, key, value):
         if('file' not in value):
             value['file'] = "\\"
+
         entity = value['dir'] + "\\" + value['file']
         if(entity not in self.setEntities):
             eProperties = {}
@@ -83,43 +84,53 @@ class FD2PN(object):
 
     def encodeProcess(self,value):
         ret = []
-        ret.append('activity(ex:act{}, -, -, [\n\tprov:type=\'adapt:unitOfExecution\',\
-        \n\tadapt:machineID=\'{}\',\
-        \n\tfoaf:accountName=\'{}\',\
-        \n\tadapt:pwd=\'{}\',\
-        \n\tprov:atTime=\'{}\',\
-        \n\tadapt:pid=\'{}\',\
-        \n\tadapt:ppid=\'{}\',\
-        \n\tadapt:privs=\'{}\',\
-        \n\tadapt:cmdLine=\'{}\',\
-        \n\tadapt:cmdString=\'{}\'])\n' . format(value['index'], value['host'], value['user'], value['dir'],
-                                               self.iso8601(value['time']), value['pid'], value['ppid'],
-                                               value['elevation'], value['cmd'], value['cmd']))
+        ret.append('activity(ex:act{}, -, -, [\n\tprov:type=\"adapt:unitOfExecution\",\
+        \n\tadapt:machineID={},\
+        \n\tfoaf:accountName={},\
+        \n\tadapt:pwd={},\
+        \n\tprov:atTime={},\
+        \n\tadapt:pid={},\
+        \n\tadapt:ppid={},\
+        \n\tadapt:privs={},\
+        \n\tadapt:cmdLine={},\
+        \n\tadapt:cmdString={}])\n' . format(value['index'],
+                                                 json.dumps(value['host']),
+                                                 json.dumps(value['user']),
+                                                 json.dumps(value['dir']),
+                                                 self.iso8601(value['time']),
+                                                 json.dumps(value['pid']),
+                                                 json.dumps(value['ppid']),
+                                                 json.dumps(value['elevation']),
+                                                 json.dumps(value['cmd']),
+                                                 json.dumps(value['cmd'])))
 
         kk = str(value['ppid']) + "_" + value['file']
         activity = self.tmpPID[kk] if kk in self.tmpPID else 0
-        ret.append('wasStartedBy(ex:act{}, ex:act{}, {}, [\
-            \n\tprov:atTime=\'{}\'])\n' . format(value['index'], activity,
+        ret.append('wasStartedBy(ex:wsb{}; ex:act{}, {}, {}, [\
+            \n\tprov:atTime=\'{}\'])\n' . format(value['index'], value['index'], activity,
                                                       self.iso8601(value['time']), self.iso8601(value['time'])))
         return ret
 
     def encodeFile(self, value):
         ret = []
-        ret.append('activity(ex:act{}, -, -, [\n\tprov:type=\'adapt:unitOfExecution\',\
-        \n\tadapt:machineID=\'{}\',\
-        \n\tprov:atTime=\'{}\',\
-        \n\tadapt:pid=\'{}\',\
-        \n\tadapt:cmdLine=\'{}\',\
-        \n\tadapt:cmdString=\'{}\'])\n' . format(value['index'], value['host'],
-                                               self.iso8601(value['time']), value['pid'],
-                                               value['process'], value['process']))
+        ret.append('activity(ex:act{}, -, -, [\n\tprov:type=\"adapt:unitOfExecution\",\
+        \n\tadapt:machineID={},\
+        \n\tprov:atTime={},\
+        \n\tadapt:pid={},\
+        \n\tadapt:cmdLine={},\
+        \n\tadapt:cmdString={}])\n' . format(value['index'],
+                                             json.dumps(value['host']),
+                                             self.iso8601(value['time']),
+                                             json.dumps(value['pid']),
+                                             json.dumps(value['process']),
+                                             json.dumps(value['process'])))
 
-        ret.append('wasAssociatedWith(ex:as{}, ex:act{}, ex:ag{}, -, -)\n' . format(value['index'],
+        ret.append('wasAssociatedWith(ex:as{}; ex:act{}, ex:ag{}, -, -)\n' . format(value['index'],
                                                                 value['index'], value['index']))
 
-        ret.append('used(ex:us{}, ex:act{}, ex:ent{}, \'{}\', [adapt:useOp=\'{}\'])\n' . format(value['index'],
+        ret.append('used(ex:us{}; ex:act{}, ex:ent{}, {}, [adapt:useOp={}])\n' . format(value['index'],
                                                             value['index'], value['index'],
-                                                            self.iso8601(value['time']), value['action']))
+                                                            self.iso8601(value['time']), json.dumps(value['action'])))
 
         kk = str(value['pid']) + "_" + value['file']
         self.tmpPID[kk] = "ex:act" + str(value['index'])
@@ -131,74 +142,82 @@ class FD2PN(object):
 
         ret.append('dc:description(ex:socket{}, [\
             \n\tprov:type=adapt:metadata,\
-            \n\tadapt:dstPortID=\'{}\',\
-            \n\tadapt:srcPort=\'{}\',\
-            \n\tadapt:srcIP=\'{}\',\
-            \n\tadapt:dstIP=\'{}\',\
-            \n\tadapt:host=\'{}\',\
-            \n\tadapt:protocol=\'{}\'])\n' . format(value['index'],
-                                         value['dport'],
-                                         value['sport'],
-                                         value['saddr'],
-                                         value['daddr'],
-                                         value ['host'],
-                                         value['protocol']))
+            \n\tadapt:dstPortID={},\
+            \n\tadapt:srcPort={},\
+            \n\tadapt:srcIP={},\
+            \n\tadapt:dstIP={},\
+            \n\tadapt:host={},\
+            \n\tadapt:protocol={}])\n' . format(value['index'],
+                                         json.dumps(value['dport']),
+                                         json.dumps(value['sport']),
+                                         json.dumps(value['saddr']),
+                                         json.dumps(value['daddr']),
+                                         json.dumps(value ['host']),
+                                         json.dumps(value['protocol'])))
 
-        ret.append('wasAssociatedWith(ex:as{}, ex:a{}, ex:ag{}, -, [])\n' . format(value['index'], value['index'], value['index']))
-        ret.append('wasGeneratedBy(ex:e{}, ex:a{}, -, [adapt:genOp=\'{}\', prov:atTime=\'{}\'])\n' . format(value['index'], value['index'],
-                                                                                    value['action'], self.iso8601(value['time'])))
+        ret.append('wasAssociatedWith(ex:as{}; ex:a{}, ex:ag{}, -, [])\n' . format(value['index'], value['index'], value['index']))
+        ret.append('wasGeneratedBy(ex:wgb{}, ex:e{}, ex:a{}, -, [adapt:genOp={}, prov:atTime={}])\n' . format(value['index'], value['index'], value['index'],
+                                                                                    json.dumps(value['action']), self.iso8601(value['time'])))
         return ret
 
     def encodeRegistry(self, value):
         ret = []
         ret.append('entity(ex:reg{}, [\
         \n\tprov:type=adapt:artifact,\
-        \n\tadapt:artifactType=\'registryEntry\',\
-        \n\tadapt:registryKey=\'{}\'])\n' . format(value['index'],value['key']))
+        \n\tadapt:artifactType=\"registryEntry\",\
+        \n\tadapt:registryKey={}])\n' . format(value['index'], json.dumps(value['key'])))
 
-        ret.append('activity(ex:act{}, -, -, [\n\tprov:type=\'adapt:unitOfExecution\',\
-        \n\tadapt:machineID=\'{}\',\
-        \n\tprov:atTime=\'{}\',\
-        \n\tadapt:pid=\'{}\',\
-        \n\tadapt:cmdLine=\'{}\',\
-        \n\tadapt:cmdString=\'{}\'])\n' . format(value['index'], value['host'],
-                                               self.iso8601(value['time']), value['pid'],
-                                               value['process'], value['process']))
+        ret.append('activity(ex:act{}, -, -, [\n\tprov:type=\"adapt:unitOfExecution\",\
+        \n\tadapt:machineID={},\
+        \n\tprov:atTime={},\
+        \n\tadapt:pid={},\
+        \n\tadapt:cmdLine={},\
+        \n\tadapt:cmdString={}])\n' . format(value['index'],
+                                             json.dumps(value['host']),
+                                             self.iso8601(value['time']),
+                                             json.dumps(value['pid']),
+                                             json.dumps(value['process']),
+                                             json.dumps(value['process'])))
 
         ret.append('wasGeneratedBy(ex:wgb{}, ex:reg{}, ex:ent{}, -, [\
-        \n\tadapt:genOp=\'{}\',\
-        \n\tadapt:registryValue=\'{}\',\
-        \n\tadapt:registryType=\'{}\'])\n' . format(value['index'], value['index'], value['index'],
-                                                  value['action'], value['newval'], value['newtype']))
+        \n\tadapt:genOp={},\
+        \n\tadapt:registryValue={},\
+        \n\tadapt:registryType={}])\n' . format(value['index'], value['index'], value['index'],
+                                                json.dumps(value['action']),
+                                                json.dumps(value['newval']),
+                                                json.dumps(value['newtype'])))
 
         return ret
 
     def encodeExit(self, value):
         ret = []
 
-        ret.append('activity(ex:act{}, -, -, [\n\tprov:type=\'adapt:unitOfExecution\',\
-        \n\tadapt:machineID=\'{}\',\
-        \n\tprov:atTime=\'{}\',\
-        \n\tadapt:pid=\'{}\',\
-        \n\tadapt:cmdLine=\'{}\',\
-        \n\tadapt:cmdString=\'{}\'])\n' . format(value['index'], value['host'],
-                                               self.iso8601(value['time']), value['pid'],
-                                               value['process'], value['process']))
+        ret.append('activity(ex:act{}, -, -, [\n\tprov:type=\"adapt:unitOfExecution\",\
+        \n\tadapt:machineID={},\
+        \n\tprov:atTime={},\
+        \n\tadapt:pid={},\
+        \n\tadapt:cmdLine={},\
+        \n\tadapt:cmdString={}])\n' . format(value['index'],
+                                             json.dumps(value['host']),
+                                             self.iso8601(value['time']),
+                                             json.dumps(value['pid']),
+                                             json.dumps(value['process']),
+                                             json.dumps(value['process'])))
 
-
-        ret.append('wasAssociatedWith(ex:as{}, ex:act{}, ex:ag{}, -, [\
-        \n\tadapt:genOp=\'ret_val\',\
-        \n\tadapt:returnVal=\'{}\'])\n' . format(value['index'], value['index'], value['index'], value['code']))
+        ret.append('wasAssociatedWith(ex:as{}; ex:act{}, ex:ag{}, -, [\
+        \n\tadapt:genOp=\"ret_val\",\
+        \n\tadapt:returnVal={}])\n' . format(value['index'],
+                                             value['index'],
+                                             value['index'],
+                                             json.dumps(value['code'])))
 
         return ret
 
     def json2Prov(self, json):
-        pp = ["document\n", "prefix ex <http://example.org/>", "prefix adapt <http://adapt.galois.com/>",
-              "prefix foaf <http://xmlns.com/foaf/0.1/>", "prefix dc <http://purl.org/dc/elements/1.1/>",
-              "prefix nfo <http://www.semanticdesktop.org/ontologies/2007/03/22/nfo/v1.2/>", ""]
+        pp = []
 
-        for i in xrange(len(decoded)):
-            for key, value in decoded[i].items() :
+        for i in xrange(len(json)):
+            for key, value in json[i].items() :
                 if(key=='file' or key=='network' or key=='registry' or key=='exit'):
                     self.getAgents(value)
                 if(key=='file'):
@@ -207,8 +226,8 @@ class FD2PN(object):
         pp += self.pretty_print_agent()
         pp += self.pretty_print_entities()
 
-        for i in xrange(len(decoded)):
-            for key, value in decoded[i].items():
+        for i in xrange(len(json)):
+            for key, value in json[i].items():
                 if(key=='file'):
                     pp += self.encodeFile(value)
                 elif(key=='process'):
@@ -222,8 +241,23 @@ class FD2PN(object):
                 else:
                     print >>sys.stderr, "Parsing error (ignoring entry): " + key
 
+        return pp
+
+    def getProvn(self, content):
+        pp = ["document\n", "prefix ex <http://example.org/>", "prefix adapt <http://adapt.galois.com/>",
+              "prefix foaf <http://xmlns.com/foaf/0.1/>", "prefix dc <http://purl.org/dc/elements/1.1/>",
+              "prefix nfo <http://www.semanticdesktop.org/ontologies/2007/03/22/nfo/v1.2/>", ""]
+
+        for i in xrange(1,len(content)):
+            if(i % 9 == 0):
+                print >>sys.stderr, "Decoding line " + str(i)
+                decoded = json.loads(content[i-1])
+                #print json.dumps(decoded, sort_keys=True, indent=4)
+                pp += self.json2Prov(decoded)
+
         pp.append("end document")
         return pp
+
 
 #with open('youtube.txt') as data_file:
 #    data = json.load(data_file)
@@ -242,10 +276,4 @@ if __name__ == '__main__':
 
     outFile =  open(args[1], "w")
     fs2pn = FD2PN()
-    for i in xrange(1,len(content)):
-        if(i % 9 == 0):
-            print >>sys.stderr, "Decoding line " + str(i)
-            decoded = json.loads(content[i-1])
-            #print json.dumps(decoded, sort_keys=True, indent=4)
-            lst = fs2pn.json2Prov(decoded)
-            outFile.write('\n'.join(lst))
+    outFile.write('\n'.join(fs2pn.getProvn(content)))
