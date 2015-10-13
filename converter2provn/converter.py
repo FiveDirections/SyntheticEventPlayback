@@ -130,13 +130,13 @@ class FD2PN(object):
         ret.append('entity(ex:socket{}, [prov:type=adapt:artifact])\n' . format(value['index']))
 
         ret.append('dc:description(ex:socket{}, [\
-            \n\tprov:type=tc:metadata,\
-            \n\ttc:dstPortID=\'{}\',\
-            \n\ttc:srcPort=\'{}\',\
-            \n\ttc:srcIP=\'{}\',\
-            \n\ttc:dstIP=\'{}\',\
-            \n\ttc:host=\'{}\',\
-            \n\ttc:protocol=\'{}\'])\n' . format(value['index'],
+            \n\tprov:type=adapt:metadata,\
+            \n\tadapt:dstPortID=\'{}\',\
+            \n\tadapt:srcPort=\'{}\',\
+            \n\tadapt:srcIP=\'{}\',\
+            \n\tadapt:dstIP=\'{}\',\
+            \n\tadapt:host=\'{}\',\
+            \n\tadapt:protocol=\'{}\'])\n' . format(value['index'],
                                          value['dport'],
                                          value['sport'],
                                          value['saddr'],
@@ -145,7 +145,7 @@ class FD2PN(object):
                                          value['protocol']))
 
         ret.append('wasAssociatedWith(ex:as{}, ex:a{}, ex:ag{}, -, [])\n' . format(value['index'], value['index'], value['index']))
-        ret.append('wasGeneratedBy(ex:e{}, ex:a{}, -, [tc:genOp=\'{}\', prov:atTime=\'{}\'])\n' . format(value['index'], value['index'],
+        ret.append('wasGeneratedBy(ex:e{}, ex:a{}, -, [adapt:genOp=\'{}\', prov:atTime=\'{}\'])\n' . format(value['index'], value['index'],
                                                                                     value['action'], self.iso8601(value['time'])))
         return ret
 
@@ -188,7 +188,7 @@ class FD2PN(object):
 
         ret.append('wasAssociatedWith(ex:as{}, ex:act{}, ex:ag{}, -, [\
         \n\tadapt:genOp=\'ret_val\',\
-        \n\tadapt:retVal=\'{}\'])\n' . format(value['index'], value['index'], value['index'], value['code']))
+        \n\tadapt:returnVal=\'{}\'])\n' . format(value['index'], value['index'], value['index'], value['code']))
 
         return ret
 
