@@ -88,7 +88,7 @@ class FD2PN(object):
         \n\tadapt:machineID={},\
         \n\tfoaf:accountName={},\
         \n\tadapt:pwd={},\
-        \n\tprov:atTime={},\
+        \n\tprov:atTime=\"{}\",\
         \n\tadapt:pid={},\
         \n\tadapt:ppid={},\
         \n\tadapt:privs={},\
@@ -107,7 +107,7 @@ class FD2PN(object):
         kk = str(value['ppid']) + "_" + value['file']
         activity = self.tmpPID[kk] if kk in self.tmpPID else 0
         ret.append('wasStartedBy(ex:wsb{}; ex:act{}, {}, -, [\
-            \n\tprov:atTime={}])\n' . format(value['index'], value['index'], activity,
+            \n\tprov:atTime=\"{}\"])\n' . format(value['index'], value['index'], activity,
                                              self.iso8601(value['time'])))
         return ret
 
@@ -115,7 +115,7 @@ class FD2PN(object):
         ret = []
         ret.append('activity(ex:act{}, -, -, [\n\tprov:type=\"adapt:unitOfExecution\",\
         \n\tadapt:machineID={},\
-        \n\tprov:atTime={},\
+        \n\tprov:atTime=\"{}\",\
         \n\tadapt:pid={},\
         \n\tadapt:cmdLine={},\
         \n\tadapt:cmdString={}])\n' . format(value['index'],
@@ -156,7 +156,7 @@ class FD2PN(object):
                                          json.dumps(value['protocol'])))
 
         ret.append('wasAssociatedWith(ex:as{}; ex:a{}, ex:ag{}, -, [])\n' . format(value['index'], value['index'], value['index']))
-        ret.append('wasGeneratedBy(ex:wgb{}; ex:e{}, ex:a{}, -, [adapt:genOp={}, prov:atTime={}])\n' . format(value['index'], value['index'], value['index'],
+        ret.append('wasGeneratedBy(ex:wgb{}; ex:e{}, ex:a{}, -, [adapt:genOp={}, prov:atTime=\"{}\"])\n' . format(value['index'], value['index'], value['index'],
                                                                                     json.dumps(value['action']), self.iso8601(value['time'])))
         return ret
 
@@ -169,7 +169,7 @@ class FD2PN(object):
 
         ret.append('activity(ex:act{}, -, -, [\n\tprov:type=\"adapt:unitOfExecution\",\
         \n\tadapt:machineID={},\
-        \n\tprov:atTime={},\
+        \n\tprov:atTime=\"{}\",\
         \n\tadapt:pid={},\
         \n\tadapt:cmdLine={},\
         \n\tadapt:cmdString={}])\n' . format(value['index'],
@@ -194,7 +194,7 @@ class FD2PN(object):
 
         ret.append('activity(ex:act{}, -, -, [\n\tprov:type=\"adapt:unitOfExecution\",\
         \n\tadapt:machineID={},\
-        \n\tprov:atTime={},\
+        \n\tprov:atTime=\"{}\",\
         \n\tadapt:pid={},\
         \n\tadapt:cmdLine={},\
         \n\tadapt:cmdString={}])\n' . format(value['index'],
