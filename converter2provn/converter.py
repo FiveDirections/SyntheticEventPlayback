@@ -38,7 +38,7 @@ class FD2PN(object):
         ret = []
         for key in self.setAgents:
             value = self.setAgents[key]
-            ret.append('agent(ex:ag{}, [prov:type=\"adapt:unitOfExecution\",' . format(value['index']))
+            ret.append('agent(ex:ag{}, [prov:type=\'adapt:unitOfExecution\',' . format(value['index']))
             ret.append('\tadapt:machineID = {},' . format(json.dumps(value['adapt:machineID'])))
             if "foaf:accountName" in value:
                 ret.append('\tfoaf:name = {},' . format(json.dumps(value['foaf:name'])))
@@ -84,7 +84,7 @@ class FD2PN(object):
 
     def encodeProcess(self,value):
         ret = []
-        ret.append('activity(ex:act{}, -, -, [\n\tprov:type=\"adapt:unitOfExecution\",\
+        ret.append('activity(ex:act{}, -, -, [\n\tprov:type=\'adapt:unitOfExecution\',\
         \n\tadapt:machineID={},\
         \n\tfoaf:accountName={},\
         \n\tadapt:pwd={},\
@@ -113,7 +113,7 @@ class FD2PN(object):
 
     def encodeFile(self, value):
         ret = []
-        ret.append('activity(ex:act{}, -, -, [\n\tprov:type=\"adapt:unitOfExecution\",\
+        ret.append('activity(ex:act{}, -, -, [\n\tprov:type=\'adapt:unitOfExecution\',\
         \n\tadapt:machineID={},\
         \n\tprov:atTime=\"{}\",\
         \n\tadapt:pid={},\
@@ -128,7 +128,7 @@ class FD2PN(object):
         ret.append('wasAssociatedWith(ex:as{}; ex:act{}, ex:ag{}, -, -)\n' . format(value['index'],
                                                                 value['index'], value['index']))
 
-        ret.append('used(ex:us{}; ex:act{}, ex:ent{}, {}, [adapt:useOp={}])\n' . format(value['index'],
+        ret.append('used(ex:us{}; ex:act{}, ex:ent{}, {}, [adapt:useOp=\"open\", adapt:privs={}])\n' . format(value['index'],
                                                             value['index'], value['index'],
                                                             self.iso8601(value['time']), json.dumps(value['action'])))
 
@@ -167,7 +167,7 @@ class FD2PN(object):
         \n\tadapt:artifactType=\"registryEntry\",\
         \n\tadapt:registryKey={}])\n' . format(value['index'], json.dumps(value['key'])))
 
-        ret.append('activity(ex:act{}, -, -, [\n\tprov:type=\"adapt:unitOfExecution\",\
+        ret.append('activity(ex:act{}, -, -, [\n\tprov:type=\'adapt:unitOfExecution\',\
         \n\tadapt:machineID={},\
         \n\tprov:atTime=\"{}\",\
         \n\tadapt:pid={},\
@@ -192,7 +192,7 @@ class FD2PN(object):
     def encodeExit(self, value):
         ret = []
 
-        ret.append('activity(ex:act{}, -, -, [\n\tprov:type=\"adapt:unitOfExecution\",\
+        ret.append('activity(ex:act{}, -, -, [\n\tprov:type=\'adapt:unitOfExecution\',\
         \n\tadapt:machineID={},\
         \n\tprov:atTime=\"{}\",\
         \n\tadapt:pid={},\
