@@ -180,12 +180,8 @@ class FD2PN(object):
                                              json.dumps(value['process'])))
 
         ret.append('wasGeneratedBy(ex:wgb{}; ex:reg{}, ex:ent{}, -, [\
-        \n\tadapt:genOp={},\
-        \n\tadapt:registryValue={},\
-        \n\tadapt:registryType={}])\n' . format(value['index'], value['index'], value['index'],
-                                                json.dumps(value['action']),
-                                                json.dumps(value['newval']),
-                                                json.dumps(value['newtype'])))
+        \n\tadapt:genOp={}])\n' . format(value['index'], value['index'], value['index'],
+                                                json.dumps(value['action'])))
 
         return ret
 
