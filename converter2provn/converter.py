@@ -27,6 +27,7 @@ class FD2PN(object):
     setAgents = {}
     setEntities = {}
     tmpPID = {}
+    chainPID = {}
 
     def iso8601(self, t):
         delta = datetime.timedelta(seconds=t)
@@ -82,6 +83,13 @@ class FD2PN(object):
             eProperties['type'] = key
             self.setEntities[entity] = eProperties
 
+    def pid2activity(self, pid, file):
+        kk = str(pid) + "_" + file
+        if(kk in self.tmpPID):
+            return self.tmpPID[kk]
+        else:
+            return self.pid2activity(self.chainPID[pid], file)
+
     def encodeProcess(self,value):
         ret = []
         ret.append('activity(ex:act{}, -, -, [\n\tprov:type=\'adapt:unitOfExecution\',\
@@ -104,8 +112,7 @@ class FD2PN(object):
                                                  json.dumps(value['cmd']),
                                                  json.dumps(value['cmd'])))
 
-        kk = str(value['ppid']) + "_" + value['file']
-        activity = self.tmpPID[kk] if kk in self.tmpPID else 0
+        activity = self.pid2activity(value['ppid'], value['file'])
         ret.append('wasStartedBy(ex:wsb{}; ex:act{}, {}, -, [\
             \n\tprov:atTime=\"{}\"])\n' . format(value['index'], value['index'], activity,
                                              self.iso8601(value['time'])))
@@ -155,9 +162,11 @@ class FD2PN(object):
                                          json.dumps(value ['host']),
                                          json.dumps(value['protocol'])))
 
-        ret.append('wasAssociatedWith(ex:as{}; ex:a{}, ex:ag{}, -, [])\n' . format(value['index'], value['index'], value['index']))
-        ret.append('wasGeneratedBy(ex:wgb{}; ex:e{}, ex:a{}, -, [adapt:genOp={}, prov:atTime=\"{}\"])\n' . format(value['index'], value['index'], value['index'],
+        ret.append('wasGeneratedBy(ex:wgb{}; ex:socket{}, ex:act{}, -, [adapt:genOp={}, prov:atTime=\"{}\"])\n' . format(value['index'], value['index'], value['index'],
                                                                                     json.dumps(value['action']), self.iso8601(value['time'])))
+
+        ret.append('wasAssociatedWith(ex:as{}; ex:act{}, ex:ag{}, -, [])\n' . format(value['index'], value['index'], value['index']))
+
         return ret
 
     def encodeRegistry(self, value):
@@ -211,6 +220,14 @@ class FD2PN(object):
 
     def json2Prov(self, json):
         pp = []
+
+        for i in xrange(len(json)):
+            for key, value in json[i].items():
+                for key, value in json[i].items() :
+                    if(key=='process'):
+                        self.chainPID[value['pid']] = value['ppid']
+
+        #print self.chainPID
 
         for i in xrange(len(json)):
             for key, value in json[i].items() :
