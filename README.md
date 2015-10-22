@@ -33,3 +33,6 @@ To see the full list of templates, look in the templates directory.
 ## License
 This software is released under the Apache License (V2). See the LICENSE.md for
 more information.
+
+## Thanks
+This project was supported by DARPA under the Cyber Fast Track Program.
