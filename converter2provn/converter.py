@@ -271,6 +271,16 @@ class FD2PN(object):
         pp.append("end document")
         return pp
 
+    def getJson(self, content):
+        pp = ""
+
+        for i in xrange(1,len(content)):
+            if(i % 9 == 0):
+                print >>sys.stderr, "Decoding line " + str(i)
+                decoded = json.loads(content[i-1])
+                pp += json.dumps(decoded, sort_keys=True, indent=4)
+
+        return pp
 
 #with open('youtube.txt') as data_file:
 #    data = json.load(data_file)
@@ -278,8 +288,12 @@ if __name__ == '__main__':
     usage = "usage: %prog inputFile outputFile"
     optp = optparse.OptionParser(usage = usage, version = "%prog 1.0")
 
-    opts, args = optp.parse_args()
-    optp.parse_args()
+    optp.add_option("-j", "--json",
+                  action="store_true", dest="jpp", default=False,
+                  help="Pretty-print json to outputFile")
+
+
+    (opts, args) = optp.parse_args()
 
     if not (len(args) == 2):
         optp.error("Missing file argument")
@@ -289,4 +303,8 @@ if __name__ == '__main__':
 
     outFile =  open(args[1], "w")
     fs2pn = FD2PN()
-    outFile.write('\n'.join(fs2pn.getProvn(content)))
+
+    if(opts.jpp):
+        outFile.write(fs2pn.getJson(content))
+    else:
+        outFile.write('\n'.join(fs2pn.getProvn(content)))
