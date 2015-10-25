@@ -282,8 +282,6 @@ class FD2PN(object):
 
         return pp
 
-#with open('youtube.txt') as data_file:
-#    data = json.load(data_file)
 if __name__ == '__main__':
     usage = "usage: %prog inputFile outputFile"
     optp = optparse.OptionParser(usage = usage, version = "%prog 1.0")
