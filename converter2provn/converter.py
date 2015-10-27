@@ -52,11 +52,12 @@ class FD2PN(object):
         ret = []
         for key in self.setEntities:
             value = self.setEntities[key]
-            ret.append('entity(ex:ent{}, [\
-                  \n\tprov:type=adapt:artifact,\
-                  \n\tadapt:artifactType={},\
-                  \n\tadapt:filePath={}])\n' . format(value['index'], json.dumps(value['type']),
-                                                        json.dumps(value['dir'] + value['file'])))
+            s = ('entity(ex:ent{}, [\n'
+                '\tprov:type=adapt:artifact,\n'
+                '\tadapt:artifactType={},\n'
+                '\tadapt:filePath={}])\n')
+            ret.append(s.format(value['index'], json.dumps(value['type']),
+                                json.dumps(value['dir'] + value['file'])))
         return ret
 
     def getAgents(self,value):
@@ -92,45 +93,46 @@ class FD2PN(object):
 
     def encodeProcess(self,value):
         ret = []
-        ret.append('activity(ex:act{}, -, -, [\n\tprov:type=\'adapt:unitOfExecution\',\
-        \n\tadapt:machineID={},\
-        \n\tfoaf:accountName={},\
-        \n\tadapt:pwd={},\
-        \n\tprov:atTime=\"{}\",\
-        \n\tadapt:pid={},\
-        \n\tadapt:ppid={},\
-        \n\tadapt:privs={},\
-        \n\tadapt:cmdLine={},\
-        \n\tadapt:cmdString={}])\n' . format(value['index'],
-                                                 json.dumps(value['host']),
-                                                 json.dumps(value['user']),
-                                                 json.dumps(value['dir']),
-                                                 self.iso8601(value['time']),
-                                                 json.dumps(value['pid']),
-                                                 json.dumps(value['ppid']),
-                                                 json.dumps(value['elevation']),
-                                                 json.dumps(value['cmd']),
-                                                 json.dumps(value['cmd'])))
+        s = ('activity(ex:act{}, -, -, [\n\tprov:type=\'adapt:unitOfExecution\',\n'
+             '\tadapt:machineID={},\n'
+             '\tfoaf:accountName={},\n'
+             '\tadapt:pwd={},\n'
+             '\tprov:atTime=\"{}\",\n'
+             '\tadapt:pid={},\n'
+             '\tadapt:ppid={},\n'
+             '\tadapt:privs={},\n'
+             '\tadapt:cmdLine={},\n'
+             '\tadapt:cmdString={}])\n')
+        ret.append(s.format(value['index'],
+                            json.dumps(value['host']),
+                            json.dumps(value['user']),
+                            json.dumps(value['dir']),
+                            self.iso8601(value['time']),
+                            json.dumps(value['pid']),
+                            json.dumps(value['ppid']),
+                            json.dumps(value['elevation']),
+                            json.dumps(value['cmd']),
+                            json.dumps(value['cmd'])))
 
         activity = self.pid2activity(value['ppid'], value['file'])
-        ret.append('wasStartedBy(ex:wsb{}; ex:act{}, {}, -, [\
-            \n\tprov:atTime=\"{}\"])\n' . format(value['index'], value['index'], activity,
-                                             self.iso8601(value['time'])))
+        s = 'wasStartedBy(ex:wsb{}; ex:act{}, {}, -, [\n\tprov:atTime=\"{}\"])\n'
+        ret.append(s.format(value['index'], value['index'], activity, self.iso8601(value['time'])))
+
         return ret
 
     def encodeFile(self, value):
         ret = []
-        ret.append('activity(ex:act{}, -, -, [\n\tprov:type=\'adapt:unitOfExecution\',\
-        \n\tadapt:machineID={},\
-        \n\tprov:atTime=\"{}\",\
-        \n\tadapt:pid={},\
-        \n\tadapt:cmdLine={},\
-        \n\tadapt:cmdString={}])\n' . format(value['index'],
-                                             json.dumps(value['host']),
-                                             self.iso8601(value['time']),
-                                             json.dumps(value['pid']),
-                                             json.dumps(value['process']),
-                                             json.dumps(value['process'])))
+        s = ('activity(ex:act{}, -, -, [\n\tprov:type=\'adapt:unitOfExecution\',\n'
+             '\tadapt:machineID={},\n'
+             '\tprov:atTime=\"{}\",\n'
+             '\tadapt:pid={},\n'
+             '\tadapt:cmdLine={},\n'
+             '\tadapt:cmdString={}])\n')
+        ret.append(s.format(value['index'], json.dumps(value['host']),
+                                            self.iso8601(value['time']),
+                                            json.dumps(value['pid']),
+                                            json.dumps(value['process']),
+                                            json.dumps(value['process'])))
 
         ret.append('wasAssociatedWith(ex:as{}; ex:act{}, ex:ag{}, -, -)\n' . format(value['index'],
                                                                 value['index'], value['index']))
@@ -147,74 +149,78 @@ class FD2PN(object):
         ret = []
         ret.append('entity(ex:socket{}, [prov:type=adapt:artifact])\n' . format(value['index']))
 
-        ret.append('dc:description(ex:socket{}, [\
-            \n\tprov:type=adapt:metadata,\
-            \n\tadapt:dstPortID={},\
-            \n\tadapt:srcPort={},\
-            \n\tadapt:srcIP={},\
-            \n\tadapt:dstIP={},\
-            \n\tadapt:host={},\
-            \n\tadapt:protocol={}])\n' . format(value['index'],
-                                         json.dumps(value['dport']),
-                                         json.dumps(value['sport']),
-                                         json.dumps(value['saddr']),
-                                         json.dumps(value['daddr']),
-                                         json.dumps(value ['host']),
-                                         json.dumps(value['protocol'])))
+        s = ('dc:description(ex:socket{}, [\n'
+             '\tprov:type=adapt:metadata,\n'
+             '\tadapt:dstPortID={},\n'
+             '\tadapt:srcPort={},\n'
+             '\tadapt:srcIP={},\n'
+             '\tadapt:dstIP={},\n'
+             '\tadapt:host={},\n'
+             '\tadapt:protocol={}])\n')
+        ret.append(s.format(value['index'], json.dumps(value['dport']),
+                                            json.dumps(value['sport']),
+                                            json.dumps(value['saddr']),
+                                            json.dumps(value['daddr']),
+                                            json.dumps(value ['host']),
+                                            json.dumps(value['protocol'])))
 
-        ret.append('wasGeneratedBy(ex:wgb{}; ex:socket{}, ex:act{}, -, [adapt:genOp={}, prov:atTime=\"{}\"])\n' . format(value['index'], value['index'], value['index'],
-                                                                                    json.dumps(value['action']), self.iso8601(value['time'])))
+        s = 'wasGeneratedBy(ex:wgb{}; ex:socket{}, ex:act{}, -, [adapt:genOp={}, prov:atTime=\"{}\"])\n'
+        ret.append(s.format(value['index'], value['index'], value['index'],
+                            json.dumps(value['action']), self.iso8601(value['time'])))
 
-        ret.append('wasAssociatedWith(ex:as{}; ex:act{}, ex:ag{}, -, [])\n' . format(value['index'], value['index'], value['index']))
+        s = 'wasAssociatedWith(ex:as{}; ex:act{}, ex:ag{}, -, [])\n'
+        ret.append(s.format(value['index'], value['index'], value['index']))
 
         return ret
 
     def encodeRegistry(self, value):
         ret = []
-        ret.append('entity(ex:reg{}, [\
-        \n\tprov:type=adapt:artifact,\
-        \n\tadapt:artifactType=\"registryEntry\",\
-        \n\tadapt:registryKey={}])\n' . format(value['index'], json.dumps(value['key'])))
 
-        ret.append('activity(ex:act{}, -, -, [\n\tprov:type=\'adapt:unitOfExecution\',\
-        \n\tadapt:machineID={},\
-        \n\tprov:atTime=\"{}\",\
-        \n\tadapt:pid={},\
-        \n\tadapt:cmdLine={},\
-        \n\tadapt:cmdString={}])\n' . format(value['index'],
-                                             json.dumps(value['host']),
-                                             self.iso8601(value['time']),
-                                             json.dumps(value['pid']),
-                                             json.dumps(value['process']),
-                                             json.dumps(value['process'])))
+        s = ('entity(ex:reg{}, [\n'
+            '\tprov:type=adapt:artifact,\n'
+            '\tadapt:artifactType=\"registryEntry\",\n'
+            '\tadapt:registryKey={}])\n')
+        ret.append(s.format(value['index'], json.dumps(value['key'])))
 
-        ret.append('wasGeneratedBy(ex:wgb{}; ex:reg{}, ex:ent{}, -, [\
-        \n\tadapt:genOp={}])\n' . format(value['index'], value['index'], value['index'],
-                                                json.dumps(value['action'])))
+        s = ('activity(ex:act{}, -, -, [\n\tprov:type=\'adapt:unitOfExecution\',\n'
+             '\tadapt:machineID={},\n'
+             '\tprov:atTime=\"{}\",\n'
+             '\tadapt:pid={},\n'
+             '\tadapt:cmdLine={},\n'
+             '\tadapt:cmdString={}])\n')
+        ret.append(s.format(value['index'], json.dumps(value['host']),
+                                            self.iso8601(value['time']),
+                                            json.dumps(value['pid']),
+                                            json.dumps(value['process']),
+                                            json.dumps(value['process'])))
+
+        s = 'wasGeneratedBy(ex:wgb{}; ex:reg{}, ex:ent{}, -, [\n\tadapt:genOp={}])\n'
+        ret.append(s.format(value['index'], value['index'], value['index'],
+                            json.dumps(value['action'])))
 
         return ret
 
     def encodeExit(self, value):
         ret = []
 
-        ret.append('activity(ex:act{}, -, -, [\n\tprov:type=\'adapt:unitOfExecution\',\
-        \n\tadapt:machineID={},\
-        \n\tprov:atTime=\"{}\",\
-        \n\tadapt:pid={},\
-        \n\tadapt:cmdLine={},\
-        \n\tadapt:cmdString={}])\n' . format(value['index'],
-                                             json.dumps(value['host']),
-                                             self.iso8601(value['time']),
-                                             json.dumps(value['pid']),
-                                             json.dumps(value['process']),
-                                             json.dumps(value['process'])))
+        s = ('activity(ex:act{}, -, -, [\n\tprov:type=\'adapt:unitOfExecution\',\n'
+             '\tadapt:machineID={},\n'
+             '\tprov:atTime=\"{}\",\n'
+             '\tadapt:pid={},\n'
+             '\tadapt:cmdLine={},\n'
+             '\tadapt:cmdString={}])\n')
+        ret.append(s.format(value['index'], json.dumps(value['host']),
+                                            self.iso8601(value['time']),
+                                            json.dumps(value['pid']),
+                                            json.dumps(value['process']),
+                                            json.dumps(value['process'])))
 
-        ret.append('wasAssociatedWith(ex:as{}; ex:act{}, ex:ag{}, -, [\
-        \n\tadapt:genOp=\"ret_val\",\
-        \n\tadapt:returnVal={}])\n' . format(value['index'],
-                                             value['index'],
-                                             value['index'],
-                                             json.dumps(value['code'])))
+        s = ('wasAssociatedWith(ex:as{}; ex:act{}, ex:ag{}, -, [\n'
+             '\tadapt:genOp=\"ret_val\",\n'
+             '\tadapt:returnVal={}])\n')
+        ret.append(s.format(value['index'], value['index'],
+                                            value['index'],
+                                            json.dumps(value['code'])))
 
         return ret
 
