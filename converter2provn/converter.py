@@ -40,20 +40,19 @@ class FD2PN(object):
         ret = []
         for key in self.setAgents:
             value = self.setAgents[key]
-            ret.append('agent(ex:ag{}, [prov:type=\'adapt:unitOfExecution\',' . format(value['index']))
-            ret.append('\tadapt:machineID = {},' . format(json.dumps(value['adapt:machineID'])))
+            ret.append('agent(data:ag{}, [prov:type=\'tc:unitOfExecution\',' . format(value['index']))
+            ret.append('\ttc:machineID = {},' . format(json.dumps(value['adapt:machineID'])))
+            ret.append('\ttc:souce = {}' . format(json.dumps(value['foaf:name'])))
             if "foaf:accountName" in value:
-                ret.append('\tfoaf:name = {},' . format(json.dumps(value['foaf:name'])))
-                ret.append('\tfoaf:accountName = {}])\n' . format(json.dumps(value['foaf:accountName'])))
-            else:
-                ret.append('\tfoaf:name = {}])\n' . format(json.dumps(value['foaf:name'])))
+                ret.append(',\n\tfoaf:accountName = {}])\n' . format(json.dumps(value['foaf:accountName'])))
+            ret.append('])\n')
         return ret
 
     def pretty_print_entities(self):
         ret = []
         for key in self.setEntities:
             value = self.setEntities[key]
-            s = ('entity(ex:ent{}, [\n'
+            s = ('entity(data:ent{}, [\n'
                 #'\tprov:type=tc:artifact,\n'
                 '\ttc:entityType={},\n'
                 '\ttc:path={}])\n')
@@ -94,7 +93,7 @@ class FD2PN(object):
 
     def encodeProcess(self,value):
         ret = []
-        s = ('activity(ex:act{}, -, -, [\n'
+        s = ('activity(data:act{}, -, -, [\n'
              #'\tprov:type=\'tc:unitOfExecution\',\n' #TODO: remove or keep?
              '\ttc:machineID={},\n'
              '\tfoaf:accountName={},\n'
@@ -110,21 +109,21 @@ class FD2PN(object):
                             json.dumps(value['user']),
                             json.dumps(value['dir']),
                             self.iso8601(value['time']),
-                            json.dumps(value['pid']),
-                            json.dumps(value['ppid']),
+                            json.dumps(str(value['pid'])),
+                            json.dumps(str(value['ppid'])),
                             json.dumps(value['elevation']),
                             json.dumps(value['cmd']),
                             json.dumps(value['cmd'])))
 
         activity = self.pid2activity(value['ppid'], value['file'])
-        s = 'wasStartedBy(ex:wsb{}; ex:act{}, {}, -, [\n\ttc:time=\"{}\"])\n'
+        s = 'wasStartedBy(data:wsb{}; data:act{}, {}, -, [\n\ttc:time=\"{}\"])\n'
         ret.append(s.format(value['index'], value['index'], activity, self.iso8601(value['time'])))
 
         return ret
 
     def encodeFile(self, value):
         ret = []
-        s = ('activity(ex:act{}, -, -, [\n'
+        s = ('activity(data:act{}, -, -, [\n'
              #'\tprov:type=\'tc:unitOfExecution\',\n' #TODO: remove or keep?
              '\ttc:machineID={},\n'
              '\ttc:time=\"{}\",\n'
@@ -133,47 +132,47 @@ class FD2PN(object):
              '\ttc:programName={}])\n')
         ret.append(s.format(value['index'], json.dumps(value['host']),
                                             self.iso8601(value['time']),
-                                            json.dumps(value['pid']),
+                                            json.dumps(str(value['pid'])),
                                             json.dumps(value['process']),
                                             json.dumps(value['process'])))
 
-        #ret.append('wasAssociatedWith(ex:as{}; ex:act{}, ex:ag{}, -, -)\n' . format(value['index'],
+        #ret.append('wasAssociatedWith(data:as{}; data:act{}, data:ag{}, -, -)\n' . format(value['index'],
         #                                                        value['index'], value['index']))
 
-        ret.append('used(ex:us{}; ex:act{}, ex:ent{}, {},'
+        ret.append('used(data:us{}; data:act{}, data:ent{}, {},'
                    '[tc:operation=\"open\", tc:privs={}])\n' . format(value['index'],
                                                             value['index'], value['index'],
                                                             self.iso8601(value['time']), json.dumps(value['action'])))
 
         kk = str(value['pid']) + "_" + value['file']
-        self.tmpPID[kk] = "ex:act" + str(value['index'])
+        self.tmpPID[kk] = "data:act" + str(value['index'])
         return ret
 
     def encodeNetwork(self, value):
         ret = []
-        ret.append('entity(ex:socket{}, [])\n' . format(value['index'])) #TODO: prov:type=tc:artifact remove or keep?
 
-        s = ('dc:description(ex:socket{}, [\n'
+        s = ('entity(data:socket{}, [\n'
              #'\tprov:type=tc:metadata,\n' #TODO: remove or keep?
              '\ttc:entityType=\"network\",\n'
-             '\ttc:dstPortID={},\n'
-             '\ttc:srcPort={},\n'
-             '\ttc:srcIP={},\n'
-             '\ttc:dstIP={},\n'
-             '\ttc:host={},\n'
+             '\ttc:sourceAddress={},\n'
+             '\ttc:sourcePort={},\n'
+             '\ttc:destinationAddress={},\n'
+             '\ttc:destinationPort={},\n'
+             '\ttc:machineID={},\n'
              '\ttc:protocol={}])\n')
-        ret.append(s.format(value['index'], json.dumps(value['dport']),
-                                            json.dumps(value['sport']),
-                                            json.dumps(value['saddr']),
-                                            json.dumps(value['daddr']),
-                                            json.dumps(value ['host']),
-                                            json.dumps(value['protocol'])))
+        ret.append(s.format(value['index'],
+                            json.dumps(value['saddr']),
+                            json.dumps(str(value['sport'])),
+                            json.dumps(value['daddr']),
+                            json.dumps(str(value['dport'])),
+                            json.dumps(value['host']),
+                            json.dumps(value['protocol'])))
 
-        s = 'wasGeneratedBy(ex:wgb{}; ex:socket{}, ex:act{}, -, [tc:operation={}, tc:time=\"{}\"])\n'
+        s = 'wasGeneratedBy(data:wgb{}; data:socket{}, data:act{}, -, [tc:operation={}, tc:time=\"{}\"])\n'
         ret.append(s.format(value['index'], value['index'], value['index'],
                             json.dumps(value['action']), self.iso8601(value['time'])))
 
-        #s = 'wasAssociatedWith(ex:as{}; ex:act{}, ex:ag{}, -, [])\n'
+        #s = 'wasAssociatedWith(data:as{}; data:act{}, data:ag{}, -, [])\n'
         #ret.append(s.format(value['index'], value['index'], value['index']))
 
         return ret
@@ -181,13 +180,13 @@ class FD2PN(object):
     def encodeRegistry(self, value):
         ret = []
 
-        s = ('entity(ex:reg{}, [\n'
+        s = ('entity(data:reg{}, [\n'
             #'\tprov:type=adapt:artifact,\n' #TODO: remove or keep?
             '\ttc:entityType=\"registryEntry\",\n'
             '\ttc:registryKey={}])\n')
         ret.append(s.format(value['index'], json.dumps(value['key'])))
 
-        s = ('activity(ex:act{}, -, -, [\n'
+        s = ('activity(data:act{}, -, -, [\n'
              #'\tprov:type=\'adapt:unitOfExecution\',\n' #TODO: remove or keep?
              '\ttc:machineID={},\n'
              '\ttc:time=\"{}\",\n'
@@ -196,11 +195,11 @@ class FD2PN(object):
              '\ttc:programName={}])\n')
         ret.append(s.format(value['index'], json.dumps(value['host']),
                                             self.iso8601(value['time']),
-                                            json.dumps(value['pid']),
+                                            json.dumps(str(value['pid'])),
                                             json.dumps(value['process']),
                                             json.dumps(value['process'])))
 
-        s = 'wasGeneratedBy(ex:wgb{}; ex:reg{}, ex:ent{}, -, [\n\ttc:operation={}])\n'
+        s = 'wasGeneratedBy(data:wgb{}; data:reg{}, data:ent{}, -, [\n\ttc:operation={}])\n'
         ret.append(s.format(value['index'], value['index'], value['index'],
                             json.dumps(value['action'])))
 
@@ -209,7 +208,7 @@ class FD2PN(object):
     def encodeExit(self, value):
         ret = []
 
-        s = ('activity(ex:act{}, -, -, [\n'
+        s = ('activity(data:act{}, -, -, [\n'
              #'\tprov:type=\'adapt:unitOfExecution\',\n' #TODO: remove or keep?
              '\ttc:machineID={},\n'
              '\ttc:time=\"{}\",\n'
@@ -218,11 +217,11 @@ class FD2PN(object):
              '\ttc:programName={}])\n')
         ret.append(s.format(value['index'], json.dumps(value['host']),
                                             self.iso8601(value['time']),
-                                            json.dumps(value['pid']),
+                                            json.dumps(str(value['pid'])),
                                             json.dumps(value['process']),
                                             json.dumps(value['process'])))
 
-        #s = ('wasAssociatedWith(ex:as{}; ex:act{}, ex:ag{}, -, [\n'
+        #s = ('wasAssociatedWith(data:as{}; data:act{}, data:ag{}, -, [\n'
         #     '\tadapt:genOp=\"ret_val\",\n'
         #     '\tadapt:returnVal={}])\n')
         #ret.append(s.format(value['index'], value['index'],
@@ -270,9 +269,9 @@ class FD2PN(object):
         return pp
 
     def getProvn(self, content):
-        pp = ["document\n", "prefix ex <http://example.org/>", "prefix tc <http://adapt.galois.com/>",
-              "prefix foaf <http://xmlns.com/foaf/0.1/>", "prefix dc <http://purl.org/dc/elements/1.1/>",
-              "prefix nfo <http://www.semanticdesktop.org/ontologies/2007/03/22/nfo/v1.2/>", ""]
+        pp = ["document\n", "prefix data <http://fivedirections.com/#>",
+              "prefix tc <http://spade.csl.sri.com/rdf/audit-tc.rdfs#>",
+              "prefix foaf <http://xmlns.com/foaf/0.1/>", ""]
 
         for i in xrange(1,len(content)):
             if(i % 9 == 0):
