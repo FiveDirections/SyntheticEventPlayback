@@ -288,7 +288,7 @@ class NetworkingWorker(Thread):
         self.retry_send = False
         if len(self.batch) > 0 and not self.stop:
             # format the batch to match JSON specs
-            post = '[' + ','.join(self.batch) + ']'
+            post = '[' + ','.join(self.batch) + ']\r\n'
             request = urllib2.Request(self.url, post)
             # Send the events and receive response
             # Fire and forget
